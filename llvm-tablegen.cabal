@@ -1,0 +1,32 @@
+name:                llvm-tablegen
+version:             0.1.0.0
+-- synopsis:
+-- description:
+homepage:            https://github.com/llvm-hs/llvm-tablegen#readme
+license:             BSD3
+license-file:        LICENSE
+author:              Moritz Kiefer
+maintainer:          moritz.kiefer@purelyfunctional.org
+copyright:           (C) 2017 Moritz Kiefer
+category:            Web
+build-type:          Simple
+extra-source-files:  README.md
+cabal-version:       >=1.10
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     LLVM.TableGen
+                       LLVM.TableGen.Lexer
+                       LLVM.TableGen.Prelude
+  build-depends:       array
+                     , base >= 4.7 && < 5
+                     , protolude
+                     , text
+                     , utf8-string
+  default-language:    Haskell2010
+  default-extensions:  NoImplicitPrelude
+                       OverloadedStrings
+
+source-repository head
+  type:     git
+  location: https://github.com/cocreature/llvm-tablegen
