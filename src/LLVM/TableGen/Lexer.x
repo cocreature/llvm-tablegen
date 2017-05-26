@@ -88,9 +88,9 @@ scanTokens str = go (AlexInput '\n' [] str) Normal
   where
     go inp st =
       case alexScan inp (lexerModeInt st) of
-        AlexEOF -> [Eof]
+        AlexEOF -> [TokEof]
         AlexError inp' ->
-          [Error (Text.cons (prevChar inp') $ Text.take 50 (currInput inp')) st]
+          [TokError (Text.cons (prevChar inp') $ Text.take 50 (currInput inp')) st]
         AlexSkip inp' _ -> go inp' st
         AlexToken inp' len act ->
           case act (Text.take len (currInput inp)) st of

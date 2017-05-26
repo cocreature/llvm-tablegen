@@ -2,4 +2,4 @@ module LLVM.TableGen.Prelude
   ( module Protolude
   ) where
 
-import Protolude
+import Protolude hiding (Type)

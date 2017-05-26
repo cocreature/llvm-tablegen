@@ -18,6 +18,8 @@ library
   exposed-modules:     LLVM.TableGen
                        LLVM.TableGen.Lexer
                        LLVM.TableGen.Lexer.Util
+                       LLVM.TableGen.Object
+                       LLVM.TableGen.Parser
                        LLVM.TableGen.Prelude
   build-depends:       array
                      , base >= 4.7 && < 5

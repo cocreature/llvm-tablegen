@@ -62,8 +62,8 @@ data Token
   | TokMulticlass
   | TokString
 
-  | Eof
-  | Error !Text !LexerMode
+  | TokEof
+  | TokError !Text !LexerMode
   deriving (Show, Eq, Ord)
 
 data LexerMode
