@@ -2,6 +2,8 @@ module LLVM.TableGen.Object
   ( Object(..)
   , Class(..)
   , Def(..)
+  , Let(..)
+  , LetItem(..)
   , ObjectBody(..)
   , SubClassRef(..)
   , Declaration(..)
@@ -9,6 +11,7 @@ module LLVM.TableGen.Object
   , Type(..)
   , Value(..)
   , SimpleValue(..)
+  , ValueSuffix(..)
   , BodyItem(..)
   ) where
 
@@ -17,6 +20,7 @@ import LLVM.TableGen.Prelude
 data Object
   = ObjClass !Class
   | ObjDef !Def
+  | ObjLet !Let
   deriving (Show, Eq, Ord)
 
 data Class = Class
@@ -30,6 +34,16 @@ data Def = Def
   , defObjectBody :: !ObjectBody
   } deriving (Show, Eq, Ord)
 
+data Let = Let
+  { letList :: ![LetItem]
+  , letObjects :: ![Object]
+  } deriving (Show, Eq, Ord)
+
+data LetItem =
+  LetItem !Text
+          !Value
+  deriving (Show, Eq, Ord)
+
 data ObjectBody = ObjectBody
   { objBaseClassList :: !(Maybe [SubClassRef])
   , objBody :: !Body
@@ -37,18 +51,34 @@ data ObjectBody = ObjectBody
 
 data SubClassRef = SubClassRef
   { classRefName :: !Text
+  , classRefArgs :: !(Maybe [Value])
   } deriving (Show, Eq, Ord)
 
 data Value =
   Value !SimpleValue
+        ![ValueSuffix]
   deriving (Show, Eq, Ord)
 
-data SimpleValue =
-  VarRef !Text
+data SimpleValue
+  = VarRef !Text
+  | ValInt !Int
+  | ValList ![Value]
+            !(Maybe Type)
+  | ValString !Text
+  | ValAnonymousRecord !Text
+                       ![Value]
   deriving (Show, Eq, Ord)
 
-data Type =
-  TyInt
+data ValueSuffix =
+  SuffixDot !Text
+  deriving (Show, Eq, Ord)
+
+data Type
+  = TyInt
+  | TyString
+  | TyBit
+  | TyList !Type
+  | ClassIdentifier !Text
   deriving (Show, Eq, Ord)
 
 data Declaration = Declaration

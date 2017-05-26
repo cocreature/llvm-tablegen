@@ -16,6 +16,12 @@ import LLVM.TableGen.Object
 'def'      { TokDef }
 'include'  { TokInclude }
 'int'      { TokInt }
+'list'     { TokList }
+'string'   { TokString }
+'bit'      { TokBit }
+'let'      { TokLet }
+'in'       { TokIn }
+
 ':'        { TokColon }
 ';'        { TokSemicolon }
 ','        { TokComma }
@@ -23,9 +29,13 @@ import LLVM.TableGen.Object
 '>'        { TokRAngle}
 '{'        { TokLBrace }
 '}'        { TokRBrace }
+'['        { TokLBracket }
+']'        { TokRBracket }
 '='        { TokEq }
+'.'        { TokDot }
 
 IDENTIFIER { TokIdentifier $$ }
+INTEGER    { TokDecimalInt $$ }
 STRING     { TokStringLit $$ }
 
 EOF        { TokEof }
@@ -53,6 +63,21 @@ includeDirective :: { IncludeDirective }
 object :: { Object }
   : class { ObjClass $1 }
   | def   { ObjDef $1 }
+  | let   { ObjLet $1 }
+
+let :: { Let }
+  : 'let' letList 'in' '{' objList '}' { Let (reverse $2) (reverse $5) }
+
+letList :: { [LetItem] }
+  : letItem { [$1] }
+  | letList ',' letItem { $3 : $1 }
+
+letItem :: { LetItem }
+  : IDENTIFIER '=' value { LetItem $1 $3 }
+
+objList :: { [Object] }
+  : {- empty -} { [] }
+  | objList object { $2 : $1 }
 
 class :: { Class }
   : 'class' IDENTIFIER templateArgList objectBody { Class $2 $3 $4 }
@@ -70,13 +95,29 @@ declaration :: { Declaration }
   | type IDENTIFIER '=' value { Declaration $1 $2 (Just $4) }
 
 type :: { Type }
-type : 'int' { TyInt }
+  : 'int' { TyInt }
+  | 'string' { TyString }
+  | 'bit' { TyBit }
+  | 'list' '<' type '>' { TyList $3 }
+  | IDENTIFIER { ClassIdentifier $1 }
 
 value :: { Value }
-  : simpleValue { Value $1 }
+  : simpleValue valueSuffixes { Value $1 (reverse $2) }
+
+valueSuffixes :: { [ValueSuffix] }
+  : {- empty -} { [] }
+  | valueSuffixes valueSuffix { $2 : $1 }
+
+valueSuffix :: { ValueSuffix }
+  : '.' IDENTIFIER { SuffixDot $2 }
 
 simpleValue :: { SimpleValue }
   : IDENTIFIER { VarRef $1 }
+  | INTEGER    { ValInt $1 }
+  | STRING     { ValString $1 }
+  | '[' valueList ']' { ValList $2 Nothing }
+  | '[' valueList ']' '<' type '>' { ValList $2 (Just $5) }
+  | IDENTIFIER '<' valueListNE '>' { ValAnonymousRecord $1 (reverse $3) }
 
 def :: { Def }
   : 'def' IDENTIFIER objectBody { Def $2 $3 }
@@ -93,7 +134,16 @@ baseClassListNE :: { [SubClassRef] }
   | baseClassListNE ',' subClassRef { $3 : $1 }
 
 subClassRef :: { SubClassRef }
-  : IDENTIFIER { SubClassRef $1 }
+  : IDENTIFIER { SubClassRef $1 Nothing }
+  | IDENTIFIER '<' valueList '>' { SubClassRef $1 (Just $3) }
+
+valueList :: { [Value] }
+  : {- empty -} { [] }
+  | valueListNE { reverse $1 }
+
+valueListNE :: { [Value] }
+  : value { [$1] }
+  | valueListNE ',' value { $3 : $1 }
 
 body :: { Body }
   : ';' { EmptyBody }
