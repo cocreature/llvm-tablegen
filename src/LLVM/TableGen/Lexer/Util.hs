@@ -64,6 +64,24 @@ data Token
 
   | TokEof
   | TokError !Text !LexerMode
+
+  | TokBangEq
+  | TokBangAdd
+  | TokBangOr
+  | TokBangCast
+  | TokBangIf
+  | TokBangShl
+  | TokBangEmpty
+  | TokBangListConcat
+  | TokBangHead
+  | TokBangSra
+  | TokBangSubst
+  | TokBangTail
+  | TokBangSrl
+  | TokBangForeach
+  | TokBangCon
+  | TokBangAnd
+  | TokBangStrconcat
   deriving (Show, Eq, Ord)
 
 data LexerMode

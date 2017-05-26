@@ -23,6 +23,7 @@ library
                        LLVM.TableGen.Prelude
   build-depends:       array
                      , base >= 4.7 && < 5
+                     , filepath
                      , protolude
                      , text
                      , utf8-string
@@ -31,6 +32,19 @@ library
   default-extensions:  NoImplicitPrelude
                        OverloadedStrings
   ghc-options:         -Wall
+
+executable tablegen
+  hs-source-dirs:      app
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , llvm-tablegen
+                     , optparse-applicative
+  default-language:    Haskell2010
+  default-extensions:  NoImplicitPrelude
+                       OverloadedStrings
+  ghc-options:         -Wall
+
 
 source-repository head
   type:     git

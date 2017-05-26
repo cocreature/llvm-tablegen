@@ -2,6 +2,7 @@ module LLVM.TableGen.Object
   ( Object(..)
   , Class(..)
   , Def(..)
+  , Defm(..)
   , Let(..)
   , LetItem(..)
   , ObjectBody(..)
@@ -13,14 +14,24 @@ module LLVM.TableGen.Object
   , SimpleValue(..)
   , ValueSuffix(..)
   , BodyItem(..)
+  , BangOperator(..)
+  , RangePiece(..)
+  , MultiClass(..)
+  , MultiClassObject(..)
   ) where
 
 import LLVM.TableGen.Prelude
 
 data Object
   = ObjClass !Class
+  | ObjMultiClass !MultiClass
   | ObjDef !Def
+  | ObjDefm !Defm
   | ObjLet !Let
+  deriving (Show, Eq, Ord)
+
+data RangePiece =
+  RangeInt !Int
   deriving (Show, Eq, Ord)
 
 data Class = Class
@@ -29,9 +40,27 @@ data Class = Class
   , classObjectBody :: !ObjectBody
   } deriving (Show, Eq, Ord)
 
+data MultiClass = MultiClass
+  { multiClassName :: !Text
+  , multiClassTemplateArgs :: !(Maybe [Declaration])
+  , multiClassBaseClasses :: ![Text]
+  , mulitiClassObjects :: ![MultiClassObject]
+  } deriving (Show, Eq, Ord)
+
+data MultiClassObject
+  = MultiDef !Def
+  | MultiDefm !Defm
+  | MultiLet !Let
+  deriving (Show, Eq, Ord)
+
 data Def = Def
   { defName :: !Text
   , defObjectBody :: !ObjectBody
+  } deriving (Show, Eq, Ord)
+
+data Defm = Defm
+  { defmName :: !Text
+  , defmBaseClasses :: ![SubClassRef]
   } deriving (Show, Eq, Ord)
 
 data Let = Let
@@ -41,6 +70,7 @@ data Let = Let
 
 data LetItem =
   LetItem !Text
+          !(Maybe [RangePiece])
           !Value
   deriving (Show, Eq, Ord)
 
@@ -59,6 +89,10 @@ data Value =
         ![ValueSuffix]
   deriving (Show, Eq, Ord)
 
+data BangOperator =
+  BangStrconcat
+  deriving (Show, Eq, Ord)
+
 data SimpleValue
   = VarRef !Text
   | ValInt !Int
@@ -67,6 +101,9 @@ data SimpleValue
   | ValString !Text
   | ValAnonymousRecord !Text
                        ![Value]
+  | ValBangOp !BangOperator
+              !(Maybe Type)
+              ![Value]
   deriving (Show, Eq, Ord)
 
 data ValueSuffix =
@@ -92,6 +129,7 @@ data Body
   | BodyList ![BodyItem]
   deriving (Show, Eq, Ord)
 
-data BodyItem =
-  ItemDecl !Declaration
+data BodyItem
+  = ItemDecl !Declaration
+  | ItemLet !LetItem
   deriving (Show, Eq, Ord)

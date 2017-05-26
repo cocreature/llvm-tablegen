@@ -62,6 +62,15 @@ $white+ ;
 "multiclass" { token TokMulticlass }
 "string"     { token TokString}
 
+"!eq" { token TokBangEq }
+"!add" { token TokBangAdd }
+"!or" { token TokBangOr }
+"!cast" { token TokBangCast }
+"!if" { token TokBangIf }
+"!shl" { token TokBangShl }
+"!empty" { token TokBangEmpty }
+"!strconcat" { token TokBangStrconcat }
+
 @identifier { tokIdentifier }
 @decimalInteger { tokDecimalInteger }
 }
