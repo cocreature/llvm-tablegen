@@ -5,7 +5,6 @@ module LLVM.TableGen.Object
   , Defm(..)
   , Let(..)
   , LetItem(..)
-  , ObjectBody(..)
   , SubClassRef(..)
   , Declaration(..)
   , Body(..)
@@ -18,6 +17,7 @@ module LLVM.TableGen.Object
   , RangePiece(..)
   , MultiClass(..)
   , MultiClassObject(..)
+  , ClassId(..)
   ) where
 
 import LLVM.TableGen.Prelude
@@ -36,13 +36,14 @@ data RangePiece =
 
 data Class = Class
   { className :: !Text
-  , classTemplateArgList :: !(Maybe [Declaration])
-  , classObjectBody :: !ObjectBody
+  , classTemplateArgs :: ![Declaration]
+  , classBaseClasses :: ![SubClassRef]
+  , classBody :: !Body
   } deriving (Show, Eq, Ord)
 
 data MultiClass = MultiClass
   { multiClassName :: !Text
-  , multiClassTemplateArgs :: !(Maybe [Declaration])
+  , multiClassTemplateArgs :: ![Declaration]
   , multiClassBaseClasses :: ![Text]
   , mulitiClassObjects :: ![MultiClassObject]
   } deriving (Show, Eq, Ord)
@@ -55,7 +56,8 @@ data MultiClassObject
 
 data Def = Def
   { defName :: !Text
-  , defObjectBody :: !ObjectBody
+  , defBaseClasses :: ![SubClassRef]
+  , defBody :: !Body
   } deriving (Show, Eq, Ord)
 
 data Defm = Defm
@@ -74,13 +76,8 @@ data LetItem =
           !Value
   deriving (Show, Eq, Ord)
 
-data ObjectBody = ObjectBody
-  { objBaseClassList :: !(Maybe [SubClassRef])
-  , objBody :: !Body
-  } deriving (Show, Eq, Ord)
-
 data SubClassRef = SubClassRef
-  { classRefName :: !Text
+  { classRefName :: !ClassId
   , classRefArgs :: !(Maybe [Value])
   } deriving (Show, Eq, Ord)
 
@@ -117,7 +114,11 @@ data Type
   | TyString
   | TyBit
   | TyList !Type
-  | ClassIdentifier !Text
+  | ClassTy !ClassId
+  deriving (Show, Eq, Ord)
+
+newtype ClassId =
+  ClassId Text
   deriving (Show, Eq, Ord)
 
 data Declaration = Declaration

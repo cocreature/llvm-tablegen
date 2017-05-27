@@ -47,6 +47,8 @@ STRING     { TokStringLit $$ }
 
 EOF        { TokEof }
 
+%left '#'
+
 %monad { Either Text }
 %error { errorP }
 
@@ -98,7 +100,7 @@ objList :: { [Object] }
   | objList object { $2 : $1 }
 
 class :: { Class }
-  : 'class' IDENTIFIER templateArgList objectBody { Class $2 $3 $4 }
+  : 'class' IDENTIFIER templateArgList objectBody { Class $2 $3 (fst $4) (snd $4) }
 
 multiclass :: { MultiClass }
   : 'multiclass' IDENTIFIER templateArgList baseMultiClassList '{' multiClassObjectList '}' { MultiClass $2 $3 $4 (reverse $6) }
@@ -120,13 +122,13 @@ multiClassObject :: { MultiClassObject }
   | defm { MultiDefm $1 }
   | let  { MultiLet $1 }
 
-templateArgList :: { Maybe [Declaration] }
-  : {- empty -} { Nothing }
-  | '<' templateArgListR '>' { Just (reverse $2) }
+templateArgList :: { [Declaration] }
+  : {- empty -} { [] }
+  | '<' templateArgListNE '>' { reverse $2 }
 
-templateArgListR :: { [Declaration] }
+templateArgListNE :: { [Declaration] }
   : declaration { [$1] }
-  | templateArgListR ',' declaration { $3 : $1 }
+  | templateArgListNE ',' declaration { $3 : $1 }
 
 declaration :: { Declaration }
   : type IDENTIFIER { Declaration $1 $2 Nothing }
@@ -137,7 +139,10 @@ type :: { Type }
   | 'string' { TyString }
   | 'bit' { TyBit }
   | 'list' '<' type '>' { TyList $3 }
-  | IDENTIFIER { ClassIdentifier $1 }
+  | classId { ClassTy $1 }
+
+classId :: { ClassId }
+  : IDENTIFIER { ClassId $1 }
 
 value :: { Value }
   : simpleValue valueSuffixes { Value $1 (reverse $2) }
@@ -163,25 +168,25 @@ bangOperator :: { BangOperator }
   : '!strconcat' { BangStrconcat }
 
 def :: { Def }
-  : 'def' IDENTIFIER objectBody { Def $2 $3 }
+  : 'def' IDENTIFIER objectBody { Def $2 (fst $3) (snd $3) }
 
 defm :: { Defm }
   : 'defm' IDENTIFIER ':' baseClassListNE ';' { Defm $2 $4 }
 
-objectBody :: { ObjectBody }
-  : baseClassList body { ObjectBody $1 $2 }
+objectBody :: { ([SubClassRef], Body) }
+  : baseClassList body { ($1, $2) }
 
-baseClassList :: { Maybe [SubClassRef] }
-  : {- empty -} { Nothing }
-  | ':' baseClassListNE { Just (reverse $2) }
+baseClassList :: { [SubClassRef] }
+  : {- empty -} { [] }
+  | ':' baseClassListNE { reverse $2 }
 
 baseClassListNE :: { [SubClassRef] }
   : subClassRef { [$1] }
   | baseClassListNE ',' subClassRef { $3 : $1 }
 
 subClassRef :: { SubClassRef }
-  : IDENTIFIER { SubClassRef $1 Nothing }
-  | IDENTIFIER '<' valueList '>' { SubClassRef $1 (Just $3) }
+  : classId { SubClassRef $1 Nothing }
+  | classId '<' valueList '>' { SubClassRef $1 (Just $3) }
 
 valueList :: { [Value] }
   : {- empty -} { [] }
