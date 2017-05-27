@@ -84,9 +84,9 @@ data SubClassRef = SubClassRef
   , classRefArgs :: !(Maybe [Value])
   } deriving (Show, Eq, Ord)
 
-data Value =
-  Value !SimpleValue
-        ![ValueSuffix]
+data Value
+  = Value !SimpleValue
+          ![ValueSuffix]
   deriving (Show, Eq, Ord)
 
 data BangOperator =
@@ -104,6 +104,8 @@ data SimpleValue
   | ValBangOp !BangOperator
               !(Maybe Type)
               ![Value]
+  | ValPaste !SimpleValue
+             !SimpleValue
   deriving (Show, Eq, Ord)
 
 data ValueSuffix =

@@ -39,6 +39,7 @@ import LLVM.TableGen.Object
 ']'        { TokRBracket }
 '='        { TokEq }
 '.'        { TokDot }
+'#'        { TokHash }
 
 IDENTIFIER { TokIdentifier $$ }
 INTEGER    { TokDecimalInt $$ }
@@ -156,6 +157,7 @@ simpleValue :: { SimpleValue }
   | '[' valueList ']' '<' type '>' { ValList $2 (Just $5) }
   | IDENTIFIER '<' valueListNE '>' { ValAnonymousRecord $1 (reverse $3) }
   | bangOperator '(' valueListNE ')' { ValBangOp $1 Nothing $3 }
+  | simpleValue '#' simpleValue { ValPaste $1 $3 }
 
 bangOperator :: { BangOperator }
   : '!strconcat' { BangStrconcat }
